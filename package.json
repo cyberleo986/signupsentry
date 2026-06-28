@@ -1,0 +1,33 @@
+{
+  "name": "signupsentry",
+  "version": "0.1.0",
+  "description": "Drop-in fraud detection for SaaS free tiers. Score signups 0-100, explain why, block in real time.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test test/",
+    "refresh-domains": "bash scripts/refresh-domains.sh"
+  },
+  "keywords": [
+    "fraud-detection",
+    "saas",
+    "signup",
+    "bot-detection",
+    "free-tier",
+    "abuse-prevention",
+    "disposable-email"
+  ],
+  "author": "BizClaw / Logical Leo",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "better-sqlite3": "^11.0.0",
+    "ua-parser-js": "^1.0.36",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {}
+}

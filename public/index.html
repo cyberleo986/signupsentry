@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SignupSentry — Drop-in Fraud Detection for SaaS Free Tiers</title>
+<meta name="description" content="Score every signup 0-100. Block bots, disposable emails, and brand impersonators in 5 lines of JS. $19/mo for 100K checks.">
+<style>
+:root { --bg: #fafafa; --fg: #1a1a1a; --muted: #666; --accent: #0066ff; --card: #fff; --border: #e5e5e5; --danger: #e53e3e; --warn: #dd6b20; --pass: #38a169; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', system-ui, sans-serif; background: var(--bg); color: var(--fg); line-height: 1.6; }
+.container { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+.hero { padding: 80px 0 60px; text-align: center; }
+.eyebrow { color: var(--accent); font-weight: 700; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
+h1 { font-size: 52px; line-height: 1.05; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 20px; }
+h1 span { color: var(--accent); }
+.subhead { font-size: 20px; color: var(--muted); max-width: 640px; margin: 0 auto 40px; }
+.code { display: block; max-width: 600px; margin: 32px auto; background: #0a0a0a; color: #fafafa; padding: 24px; border-radius: 10px; text-align: left; font-family: 'SF Mono', Menlo, monospace; font-size: 14px; line-height: 1.7; overflow-x: auto; }
+.code .comment { color: #888; }
+.section { padding: 50px 0; }
+.section h2 { font-size: 36px; margin-bottom: 24px; text-align: center; }
+.section h3 { font-size: 20px; margin-bottom: 12px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.card { background: var(--card); border: 1px solid var(--border); padding: 24px; border-radius: 10px; }
+.card .num { color: var(--accent); font-weight: 800; font-size: 28px; margin-bottom: 8px; }
+.card p { color: var(--muted); font-size: 14px; margin-top: 8px; }
+.example { background: #0a0a0a; color: #fafafa; padding: 16px; border-radius: 8px; font-family: 'SF Mono', Menlo, monospace; font-size: 13px; line-height: 1.7; overflow-x: auto; white-space: pre-wrap; }
+.example .key { color: #93c5fd; }
+.example .str { color: #86efac; }
+.example .num { color: #fbbf24; }
+.example .comment { color: #888; }
+.pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; max-width: 880px; margin: 0 auto; }
+.price-card { background: var(--card); border: 1px solid var(--border); padding: 32px 24px; border-radius: 10px; text-align: center; }
+.price-card.featured { border-color: var(--accent); border-width: 2px; box-shadow: 0 8px 24px rgba(0,102,255,0.1); }
+.price-card .tier { color: var(--muted); font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.price-card .price { font-size: 48px; font-weight: 800; margin: 12px 0; }
+.price-card .price small { font-size: 16px; color: var(--muted); font-weight: 400; }
+.price-card ul { list-style: none; margin: 20px 0; text-align: left; }
+.price-card ul li { padding: 6px 0; color: var(--muted); font-size: 14px; }
+.price-card ul li::before { content: "✓ "; color: var(--accent); font-weight: 700; }
+.btn { display: inline-block; background: var(--accent); color: #fff; padding: 14px 28px; border-radius: 8px; font-weight: 700; text-decoration: none; }
+.btn-secondary { background: #fff; color: var(--accent); border: 2px solid var(--accent); }
+.tester { max-width: 720px; margin: 24px auto; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 28px; text-align: left; }
+.tester label { font-weight: 600; display: block; margin: 12px 0 6px; font-size: 14px; }
+.tester input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; font-family: inherit; }
+.tester input:focus { outline: none; border-color: var(--accent); }
+.tester button { margin-top: 16px; background: var(--accent); color: #fff; border: none; padding: 12px 28px; border-radius: 6px; font-weight: 700; cursor: pointer; }
+.tester-result { margin-top: 20px; padding: 20px; border-radius: 8px; display: none; }
+.tester-result.pass { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+.tester-result.flag { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+.tester-result.block { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+.tester-result .score-num { font-size: 36px; font-weight: 800; }
+.tester-result ul { margin-top: 12px; padding-left: 20px; font-size: 13px; }
+.footer { text-align: center; padding: 40px 0; color: var(--muted); font-size: 13px; }
+.demo-call { background: #0a0a0a; color: #d4d4d4; padding: 12px 16px; border-radius: 6px; font-family: 'SF Mono', Menlo, monospace; font-size: 13px; margin: 8px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<section class="hero">
+  <div class="eyebrow">🛡️ Drop-in fraud detection</div>
+  <h1>Stop fake signups<br>before they <span>cost you anything.</span></h1>
+  <p class="subhead">Score every signup 0–100. Block disposable emails, bot networks, and brand impersonators in 5 lines of JS. $19/mo for 100K checks.</p>
+
+  <pre class="code"><span class="comment">// 5-line drop-in</span>
+const res = await fetch('<span style="color:#86efac">https://signupsentry.onrender.com/v1/check</span>', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email, user_agent: navigator.userAgent })
+});
+const { score, action } = await res.json();
+<span class="comment">// score 0–100, action: pass | flag | block</span></pre>
+</section>
+
+<section class="section">
+  <h2>Try it now</h2>
+  <p style="text-align:center;color:var(--muted);margin-bottom:24px">No signup. No API key. Paste a suspect email and see what we'd do.</p>
+  <div class="tester">
+    <label>Email</label>
+    <input id="emailInput" type="email" placeholder="user@mailinator.com" value="user@mailinator.com">
+    <label>Name (optional — for brand-impersonation check)</label>
+    <input id="nameInput" type="text" placeholder="Apple Support">
+    <button id="testBtn">Score this signup</button>
+    <div class="tester-result" id="result"></div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>What we catch</h2>
+  <div class="grid">
+    <div class="card"><div class="num">574+</div><h3>Disposable email domains</h3><p>Mailinator, Yopmail, 10MinuteMail, GuerrillaMail, Temp-Mail, throwaway, burnermail and hundreds more. Refreshed daily.</p></div>
+    <div class="card"><div class="num">245</div><h3>Protected brands</h3><p>Levenshtein distance vs Apple, Stripe, Spotify, PayPal, GitHub, etc. Catches "Appie Support", "Stripee", "PayPaI".</p></div>
+    <div class="card"><div class="num">20+ UA</div><h3>Bot indicators</h3><p>Empty UA, curl, wget, python-requests, headless browsers. Combined with missing fingerprint → likely automated.</p></div>
+    <div class="card"><div class="num">100%</div><h3>Local. No ML.</h3><p>All scoring is rule-based. No external API calls. ~1ms per check. Works offline after first install.</p></div>
+    <div class="card"><div class="num">0</div><h3>PII stored</h3><p>We score and forget. No email hashing, no fingerprints, no IP storage. GDPR-friendly by default.</p></div>
+    <div class="card"><div class="num">5 lines</div><h3>Drop-in widget</h3><p>Vanilla JS, async, no jQuery. Goes in any signup form. Fall back to Stripe Radar if you want.</p></div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Response format</h2>
+  <div class="example"><span class="key">"score"</span>: <span class="num">85</span>,
+<span class="key">"action"</span>: <span class="str">"block"</span>,
+<span class="key">"reasons"</span>: [
+  {
+    <span class="key">"code"</span>: <span class="str">"disposable_email"</span>,
+    <span class="key">"weight"</span>: <span class="num">50</span>,
+    <span class="key">"detail"</span>: <span class="str">"mailinator.com is a known disposable email provider"</span>
+  },
+  {
+    <span class="key">"code"</span>: <span class="str">"brand_squat"</span>,
+    <span class="key">"weight"</span>: <span class="num">30</span>,
+    <span class="key">"detail"</span>: <span class="str">"\"Appie Support\" is 1 edit from protected brand \"apple\""</span>
+  },
+  {
+    <span class="key">"code"</span>: <span class="str">"tool_ua"</span>,
+    <span class="key">"weight"</span>: <span class="num">20</span>,
+    <span class="key">"detail"</span>: <span class="str">"User-Agent is a CLI tool or known bot"</span>
+  }
+],
+<span class="key">"requestId"</span>: <span class="str">"a3f2c8..."</span></div>
+</section>
+
+<section class="section">
+  <h2>Pricing</h2>
+  <p style="text-align:center;color:var(--muted);margin-bottom:24px">Per-check cost is intentionally below what abuse would burn — you're always ahead.</p>
+  <div class="pricing">
+    <div class="price-card">
+      <div class="tier">Free</div>
+      <div class="price">$0<small>/mo</small></div>
+      <ul>
+        <li>10,000 checks/mo</li>
+        <li>Full scoring engine</li>
+        <li>Public disposable-email list</li>
+        <li>Community support</li>
+      </ul>
+      <a href="#" class="btn btn-secondary">Get API key</a>
+    </div>
+    <div class="price-card featured">
+      <div class="tier">Solo · Most popular</div>
+      <div class="price">$19<small>/mo</small></div>
+      <ul>
+        <li>100,000 checks/mo</li>
+        <li>Webhook alerts (high-risk)</li>
+        <li>Email + Discord alerts</li>
+        <li>Dashboard with usage graph</li>
+        <li>Cancel anytime</li>
+      </ul>
+      <button class="btn" onclick="checkout('solo')">Start Solo</button>
+    </div>
+    <div class="price-card">
+      <div class="tier">Team</div>
+      <div class="price">$49<small>/mo</small></div>
+      <ul>
+        <li>1,000,000 checks/mo</li>
+        <li>Custom rules</li>
+        <li>Slack + Telegram alerts</li>
+        <li>Dedicated support</li>
+        <li>SLA: 99.9%</li>
+      </ul>
+      <button class="btn" onclick="checkout('team')">Start Team</button>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>For indie founders</h2>
+  <p style="text-align:center;color:var(--muted);max-width:600px;margin:0 auto 24px">You launched a free tier. Day 1, you had 3 real signups and 47 fake ones. By day 30, your database has 8K accounts and 12 are real. SignupSentry is for the first problem.</p>
+  <div class="demo-call">$ curl -s -X POST https://signupsentry.onrender.com/v1/check \
+  -H "Content-Type: application/json" \
+  -d '{"email":"real.user@gmail.com","user_agent":"Mozilla/5.0 (Macintosh)"}'
+{"score":0,"action":"pass","reasons":[]}</div>
+<div class="demo-call">$ curl -s -X POST https://signupsentry.onrender.com/v1/check \
+  -H "Content-Type: application/json" \
+  -d '{"email":"aaaabbbb1234@mailinator.com","user_agent":"curl/7.0"}'
+{"score":85,"action":"block","reasons":["disposable_email (+50)","random_local (+15)","tool_ua (+20)"]}</div>
+</section>
+
+<div class="footer">
+  © 2026 <a href="https://bizclaw.com" style="color:var(--accent)">BizClaw</a> · <a href="/dashboard">Dashboard</a> · <a href="https://github.com/cyberleo986/signupsentry">GitHub</a> · <a href="https://bizclaw.com" style="color:var(--muted)">bizclaw.com</a>
+</div>
+
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const result = $('result');
+
+$('testBtn').addEventListener('click', async () => {
+  const email = $('emailInput').value;
+  const name = $('nameInput').value;
+  result.style.display = 'none';
+  $('testBtn').disabled = true;
+  $('testBtn').textContent = 'Scoring…';
+  try {
+    const res = await fetch('/v1/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, name, user_agent: navigator.userAgent }),
+    });
+    const data = await res.json();
+    result.className = 'tester-result ' + data.action;
+    let html = `<div>Action: <strong>${data.action.toUpperCase()}</strong></div>`;
+    html += `<div class="score-num">${data.score}/100</div>`;
+    if (data.reasons && data.reasons.length) {
+      html += '<ul>';
+      for (const r of data.reasons) html += `<li><strong>${r.code}</strong> (+${r.weight}): ${r.detail}</li>`;
+      html += '</ul>';
+    } else {
+      html += '<div style="margin-top:12px;font-size:13px">No red flags. Likely real.</div>';
+    }
+    result.innerHTML = html;
+    result.style.display = 'block';
+  } catch (e) {
+    result.className = 'tester-result block';
+    result.innerHTML = `Error: ${e.message}`;
+    result.style.display = 'block';
+  }
+  $('testBtn').disabled = false;
+  $('testBtn').textContent = 'Score this signup';
+});
+
+async function checkout(tier) {
+  try {
+    const res = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tier }),
+    });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+    else alert('Error: ' + (data.error || 'Unknown'));
+  } catch (e) {
+    alert('Error: ' + e.message);
+  }
+}
+</script>
+
+</body>
+</html>
